@@ -988,7 +988,7 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
 
     List<PrimaryKey> primaryKeys = castNonNull(this.primaryKeys, "primaryKeys");
     int numKeys = primaryKeys.size();
-    List<Object> primaryKeyValues = new ArrayList<>(numKeys);
+    List<Object> primaryKeyValues = new ArrayList<Object>(numKeys);
 
     if (deleteStatement == null) {
       StringBuilder deleteSQL =
@@ -1338,7 +1338,7 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
 
     List<PrimaryKey> primaryKeys = castNonNull(this.primaryKeys, "primaryKeys");
     int numKeys = primaryKeys.size();
-    List<Object> primaryKeyValues = new ArrayList<>(numKeys);
+    List<Object> primaryKeyValues = new ArrayList<Object>(numKeys);
 
     for (int i = 0; i < numKeys; i++) {
       PrimaryKey primaryKey = primaryKeys.get(i);
@@ -1431,7 +1431,7 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
 
     List<PrimaryKey> primaryKeys = castNonNull(this.primaryKeys, "primaryKeys");
     int numKeys = primaryKeys.size();
-    List<Object> primaryKeyValues = new ArrayList<>(numKeys);
+    List<Object> primaryKeyValues = new ArrayList<Object>(numKeys);
 
     for (int i = 0; i < numKeys; i++) {
       PrimaryKey primaryKey = primaryKeys.get(i);
