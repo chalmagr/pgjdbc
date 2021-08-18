@@ -988,12 +988,13 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
 
     List<PrimaryKey> primaryKeys = castNonNull(this.primaryKeys, "primaryKeys");
     int numKeys = primaryKeys.size();
-    List<Object> primaryKeyValues = new ArrayList<Object>(numKeys);
+    final List<Object> primaryKeyValues;
 
     if (deleteStatement == null) {
       StringBuilder deleteSQL =
           new StringBuilder("DELETE FROM ").append(onlyTable).append(tableName).append(" where ");
 
+      primaryKeyValues = new ArrayList<Object>(numKeys);
       for (int i = 0; i < numKeys; i++) {
         PrimaryKey primaryKey = primaryKeys.get(i);
         Object value = primaryKey.getValue();
@@ -1007,6 +1008,13 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
       }
 
       deleteStatement = connection.prepareStatement(deleteSQL.toString());
+    } else {
+      primaryKeyValues = new ArrayList<Object>(numKeys);
+      for (int i = 0; i < numKeys; i++) {
+        PrimaryKey primaryKey = primaryKeys.get(i);
+        Object value = primaryKey.getValue();
+        primaryKeyValues.add(value);
+      }
     }
     deleteStatement.clearParameters();
 
@@ -1672,7 +1680,7 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
       /* make sure that the user has included the primary key in the resultset */
       if (index > 0) {
         i++;
-        primaryKeys.add(new PrimaryKey(index, columnName)); // get the primary key information
+        primaryKeys.add(new PrimaryKey(index, columnName, rs.getBoolean("IS_PRIMARY"))); // get the primary key information
       }
     }
 
@@ -1696,14 +1704,14 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
 
       // oidIndex will be >0 if the oid was in the select list
       if (oidIndex > 0) {
-        primaryKeys.add(new PrimaryKey(oidIndex, "oid"));
+        primaryKeys.add(new PrimaryKey(oidIndex, "oid", true));
         usingOID = true;
         updateable = true;
       }
     }
 
     if (!updateable) {
-      throw new PSQLException(GT.tr("No primary key found for table {0}.", tableName),
+      throw new PSQLException(GT.tr("No eligible primary or unique key found for table {0}.", tableName),
           PSQLState.INVALID_CURSOR_STATE);
     }
 
@@ -3331,10 +3339,12 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
   private class PrimaryKey {
     int index; // where in the result set is this primaryKey
     String name; // what is the columnName of this primary Key
+    boolean isPrimary; // is this part of primary or unique key
 
-    PrimaryKey(int index, String name) {
+    PrimaryKey(int index, String name, boolean isPrimary) {
       this.index = index;
       this.name = name;
+      this.isPrimary = isPrimary;
     }
 
     @Nullable Object getValue() throws SQLException {
