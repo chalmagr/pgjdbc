@@ -1001,7 +1001,7 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
         primaryKeyValues.add(value);
 
         Utils.escapeIdentifier(deleteSQL, primaryKey.name);
-        deleteSQL.append(value == null ? " IS NULL" : " = ?");
+        deleteSQL.append(primaryKey.isPrimary || value != null ? " = ?" : " IS NULL");
         if (i < numKeys - 1) {
           deleteSQL.append(" and ");
         }
@@ -1352,7 +1352,9 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
       PrimaryKey primaryKey = primaryKeys.get(i);
       Object value = primaryKey.getValue();
       primaryKeyValues.add(value);
-      selectSQL.append(primaryKey.name).append(value != null ? " = ?" : " IS NULL");
+      selectSQL
+          .append(primaryKey.name)
+          .append(primaryKey.isPrimary || value != null ? " = ?" : " IS NULL");
 
       if (i < numKeys - 1) {
         selectSQL.append(" and ");
@@ -1447,7 +1449,7 @@ public class PgResultSet implements ResultSet, org.postgresql.PGRefCursorResultS
       primaryKeyValues.add(value);
 
       Utils.escapeIdentifier(updateSQL, primaryKey.name);
-      updateSQL.append(value != null ? " = ?" : " IS NULL");
+      updateSQL.append(primaryKey.isPrimary || value != null ? " = ?" : " IS NULL");
 
       if (i < numKeys - 1) {
         updateSQL.append(" and ");
